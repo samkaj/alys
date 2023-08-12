@@ -1,19 +1,8 @@
 from enum import Enum
 
-
-class Tag(Enum):
-    HTML = 0
-    P = 1
-    H1 = 2
-    H2 = 3
-    H3 = 4
-    H4 = 5
-    H5 = 6
-    H6 = 7
-    EMPTY = 8
-    UL = 9
-    OL = 10
-    LI = 11
+Tag = Enum(
+    "Tag", ["HTML", "P", "H1", "H2", "H3", "H4", "H5", "H6", "UL", "OL", "LI", "EMPTY"]
+)
 
 
 class Token:
