@@ -77,6 +77,26 @@ class TestLexer(unittest.TestCase):
             got = l.get_latest_token()
             self.assertEqual(got.content, want.content)
 
+    def test_is_list_item(self):
+        test_cases = [
+            ("- unordered list item", True),
+            ("* unordered list item", True),
+            ("1. ordered list item", True),
+            ("0. ordered list item", True),
+            ("0001230532452. ordered list item", True),
+            ("  - unordered list item", True),
+            ("-list item", False),
+            ("*list item", False),
+            ("12334.list item", False),
+            ("123d3. list item", False),
+        ]
+
+        for test_case in test_cases:
+            l = lexer.Lexer()
+            got = l.is_list_item(test_case[0])
+            want = test_case[1]
+            self.assertEqual(got, want)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -108,3 +108,20 @@ class Lexer:
                 token = Token(Tag.P, line)
 
         self.add(token)
+
+    def is_list_item(self, line: str) -> bool:
+        line = line.lstrip()
+        if line.startswith("- ") or line.startswith("* "):
+            return True
+        
+        ordered = line.split(".")
+        if len(ordered) < 2:
+            return False
+
+        for c in ordered[0]:
+            if c not in "1234567890":
+                return False
+
+        return ordered[1].startswith(" ")
+
+

@@ -11,6 +11,9 @@ class Tag(Enum):
     H5 = 6
     H6 = 7
     EMPTY = 8
+    UL = 9
+    OL = 10
+    LI = 11
 
 
 class Token:
