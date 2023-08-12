@@ -1,7 +1,22 @@
 from enum import Enum
 
 Tag = Enum(
-    "Tag", ["HTML", "P", "H1", "H2", "H3", "H4", "H5", "H6", "UL", "OL", "LI", "EMPTY"]
+    "Tag",
+    [
+        "HTML",
+        "P",
+        "H1",
+        "H2",
+        "H3",
+        "H4",
+        "H5",
+        "H6",
+        "UL",
+        "OL",
+        "LI",
+        "EMPTY",
+        "IDENT",
+    ],
 )
 
 

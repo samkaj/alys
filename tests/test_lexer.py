@@ -89,6 +89,7 @@ class TestLexer(unittest.TestCase):
             ("*list item", False),
             ("12334.list item", False),
             ("123d3. list item", False),
+            ("-- list item", False),
         ]
 
         for test_case in test_cases:
@@ -96,6 +97,32 @@ class TestLexer(unittest.TestCase):
             got = l.is_list_item(test_case[0])
             want = test_case[1]
             self.assertEqual(got, want)
+
+    def test_handle_list(self):
+        test_cases = [
+            ("      - list", 3, lexer.Tag.LI),
+            ("       * list", 3, lexer.Tag.LI),
+            ("  - list", 1, lexer.Tag.LI),
+            ("   1. list", 1, lexer.Tag.LI),
+            ("    1. list", 2, lexer.Tag.LI),
+            ("      1. list", 3, lexer.Tag.LI),
+            ("       1. list", 3, lexer.Tag.LI),
+            ("  1. list", 1, lexer.Tag.LI),
+            ("   1. list", 1, lexer.Tag.LI),
+            ("    1. list", 2, lexer.Tag.LI),
+        ]
+
+        for test_case in test_cases:
+            l = lexer.Lexer()
+            l.handle_list(test_case[0])
+            want = test_case[2]
+            tokens = l.get_tokens()
+            j = 0
+            for i in range(test_case[1]):
+                self.assertEqual(tokens[i].tag, lexer.Tag.IDENT)
+                j += 1
+
+            self.assertEqual(tokens[j].tag, want)
 
 
 if __name__ == "__main__":
