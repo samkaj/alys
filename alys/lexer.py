@@ -16,12 +16,15 @@ class Lexer:
         if self.is_setext(line):
             self.handle_setext_heading(line)
             return
+        if self.is_list_item(line):
+            self.handle_list(line)
+            return
         self.paragraph(line)
 
     def set_current_tag(self, new_tag: Tag):
         self.current_tag = new_tag
 
-    def get_tokens(self)-> list[Token]:
+    def get_tokens(self) -> list[Token]:
         return self.tokens
 
     def get_latest_token(self) -> Token:
@@ -143,13 +146,13 @@ class Lexer:
                 if c == ".":
                     offset += 1
                     break
-        
+
         for c in line:
             if c == " ":
                 idents += 1
                 continue
             break
-        
+
         for _ in range(idents // 2):
             self.add(Token(Tag.IDENT))
 

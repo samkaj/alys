@@ -114,7 +114,7 @@ class TestLexer(unittest.TestCase):
 
         for test_case in test_cases:
             l = lexer.Lexer()
-            l.handle_list(test_case[0])
+            l.lex(test_case[0])
             want = test_case[2]
             tokens = l.get_tokens()
             j = 0
