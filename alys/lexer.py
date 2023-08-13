@@ -19,6 +19,9 @@ class Lexer:
         if self.is_list_item(line):
             self.handle_list(line)
             return
+        if self.is_hr(line):
+            self.add(Token(Tag.HR))
+            return
         self.paragraph(line)
 
     def set_current_tag(self, new_tag: Tag):
@@ -159,3 +162,11 @@ class Lexer:
         content = line[idents + offset + 2 :]
 
         self.add(Token(Tag.LI, content))
+
+    def is_hr(self, line: str) -> bool:
+        stripped_line = line.replace(" ", "")
+        if len(stripped_line) < 3:
+            return False
+
+        c = stripped_line[0]
+        return stripped_line.replace(c, "") == ""

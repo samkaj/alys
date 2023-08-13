@@ -124,6 +124,41 @@ class TestLexer(unittest.TestCase):
 
             self.assertEqual(tokens[j].tag, want)
 
+    def test_is_hr(self):
+        test_cases = [
+            ("- - -", True),
+            ("_ _ _", True),
+            ("* * *", True),
+            ("***", True),
+            ("---", True),
+            ("___", True),
+            ("      ***", True),
+            ("    ---", True),
+            ("     ___", True),
+            ("*          **", True),
+            ("--      -", True),
+            ("_  _        _", True),
+            ("_____________________", True),
+            ("----------------", True),
+            ("************", True),
+            ("*-**********", False),
+            ("****____*******", False),
+            ("--------_", False),
+            ("*", False),
+            ("", False),
+            ("--", False),
+            ("**", False),
+            ("_", False),
+            ("-", False),
+            ("_", False),
+        ]
+
+        for test_case in test_cases:
+            l = lexer.Lexer()
+            got = l.is_hr(test_case[0])
+            want = test_case[1]
+            self.assertEqual(got, want)
+
 
 if __name__ == "__main__":
     unittest.main()

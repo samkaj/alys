@@ -16,6 +16,7 @@ Tag = Enum(
         "LI",
         "EMPTY",
         "IDENT",
+        "HR",
     ],
 )
 
