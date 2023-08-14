@@ -61,6 +61,8 @@ class Lexer:
 
     def paragraph(self, line: str) -> None:
         self.add(Token(Tag.P, line))
+        if line.endswith("  "):
+            self.add(Token(Tag.BR))
 
     def handle_setext_heading(self, line: str) -> None:
         if not self.is_setext(line):
@@ -115,7 +117,8 @@ class Lexer:
             case 6:
                 token = Token(Tag.H6, content)
             case _:
-                token = Token(Tag.P, line)
+                self.paragraph(line)
+                return
 
         self.add(token)
 

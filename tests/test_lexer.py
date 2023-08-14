@@ -177,6 +177,24 @@ class TestLexer(unittest.TestCase):
             want = test_case[1]
             self.assertEqual(got, want)
 
+    def test_br(self):
+        test_cases = [
+            ("hello world  ", True),
+            ("hello world      ", True),
+            ("hello world    ", True),
+            ("hello world   . ", False),
+            ("hello world.", False),
+        ]
+
+        for test_case in test_cases:
+            l = lexer.Lexer()
+            l.lex(test_case[0])
+            got = l.get_latest_token().tag == lexer.Tag.BR
+            want = test_case[1]
+            self.assertEqual(got, want)
+            
+
+
 
 if __name__ == "__main__":
     unittest.main()
