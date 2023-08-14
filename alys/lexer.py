@@ -146,8 +146,9 @@ class Lexer:
             content = line.lstrip()[1:]
         else:
             for c in line.lstrip():
-                if c == ".":
+                if c in "1234567890":
                     offset += 1
+                if c == ".":
                     break
 
         for c in line:

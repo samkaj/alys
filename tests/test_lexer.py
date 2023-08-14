@@ -110,6 +110,13 @@ class TestLexer(unittest.TestCase):
             ("  1. list", 1, lexer.Tag.LI),
             ("   1. list", 1, lexer.Tag.LI),
             ("    1. list", 2, lexer.Tag.LI),
+            ("  123452345. list", 1, lexer.Tag.LI),
+            ("   3341114576776. list", 1, lexer.Tag.LI),
+            ("    11234432. list", 2, lexer.Tag.LI),
+            ("    112. 34432. list", 2, lexer.Tag.LI),
+            ("  13948579283475. list", 1, lexer.Tag.LI),
+            ("   1098098098. list", 1, lexer.Tag.LI),
+            ("    11235. list", 2, lexer.Tag.LI),
         ]
 
         for test_case in test_cases:
@@ -118,11 +125,18 @@ class TestLexer(unittest.TestCase):
             want = test_case[2]
             tokens = l.get_tokens()
             j = 0
+            if test_case[0].lstrip()[0] in "-*":
+                content = "".join(test_case[0].lstrip()[2:])
+            else:
+                offset = test_case[0].find(". ")
+                content = "".join(test_case[0][offset + 2 :])
+
             for i in range(test_case[1]):
                 self.assertEqual(tokens[i].tag, lexer.Tag.IDENT)
                 j += 1
 
             self.assertEqual(tokens[j].tag, want)
+            self.assertEqual(tokens[j].content, content)
 
     def test_is_hr(self):
         test_cases = [
