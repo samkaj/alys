@@ -165,6 +165,10 @@ class TestLexer(unittest.TestCase):
             ("_", False),
             ("-", False),
             ("_", False),
+            ("333", False),
+            ("33333333333333", False),
+            ("aaaaaaaaa", False),
+            ("aa", False),
         ]
 
         for test_case in test_cases:

@@ -170,4 +170,7 @@ class Lexer:
             return False
 
         c = stripped_line[0]
+        if c not in "*_-":
+            return False
+
         return stripped_line.replace(c, "") == ""
