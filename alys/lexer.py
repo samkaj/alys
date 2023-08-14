@@ -22,6 +22,9 @@ class Lexer:
         if self.is_hr(line):
             self.add(Token(Tag.HR))
             return
+        if self.is_blockquote(line):
+            self.handle_blockquote(line)
+            return
         self.paragraph(line)
 
     def set_current_tag(self, new_tag: Tag):
@@ -177,3 +180,20 @@ class Lexer:
             return False
 
         return stripped_line.replace(c, "") == ""
+
+    def is_blockquote(self, line: str) -> bool:
+        return line.lstrip().startswith(">") and not line.startswith("    ")
+
+    def handle_blockquote(self, line: str):
+        if not self.is_blockquote(line):
+            raise TypeError(f'expected a blockquote (starts with >), got {line}')
+        
+        blockquote_index = line.find(">")
+        is_empty_blockquote = blockquote_index == len(line) - 1
+        if is_empty_blockquote:
+            self.add(Token(Tag.BLOCKQUOTE))
+            return
+
+        content = line[blockquote_index+1:]
+        self.lex(content.lstrip())
+

@@ -2,7 +2,7 @@ import sys
 import unittest
 
 sys.path.insert(0, "..")
-from alys import lexer
+from alys import lexer, token
 
 
 class TestLexer(unittest.TestCase):
@@ -192,8 +192,55 @@ class TestLexer(unittest.TestCase):
             got = l.get_latest_token().tag == lexer.Tag.BR
             want = test_case[1]
             self.assertEqual(got, want)
-            
 
+    def test_blockquote(self):
+        test_cases = [
+            (">hello", True),
+            (" >hello", True),
+            ("> hello", True),
+            ("   >hello", True),
+            ("    >hello", False),
+            ("   > hello", True),
+        ]
+
+        for test_case in test_cases:
+            l = lexer.Lexer()
+            got = l.is_blockquote(test_case[0])
+            want = test_case[1]
+            self.assertEqual(got, want)
+
+    def test_handle_blockquote(self):
+        test_cases = [
+            (">quote", 1, "quote"),
+            (">>quote", 2, "quote"),
+            (">>>quote", 3, "quote"),
+            (">>># quote", 3, "quote"),
+            ("># quote", 3, "quote"),
+            (">- quote", 3, "quote"),
+            (">12341234. quote", 3, "quote"),
+            (">>>12341234. quote", 3, "quote"),
+            ("> quote", 1, "quote"),
+            (">   > quote", 2, "quote"),
+            (">>> quote", 3, "quote"),
+            (">  > > # quote", 3, "quote"),
+            (" ># quote", 3, "quote"),
+            ("  >- quote", 3, "quote"),
+            (" >12341234. quote", 3, "quote"),
+            (" >> >12341234. quote", 3, "quote"),
+        ]
+
+        for test_case in test_cases:
+            l = lexer.Lexer()
+            line = test_case[0]
+            l.lex(line)
+            levels = test_case[1]
+            want = test_case[2]
+            tokens = l.get_tokens()
+            print(f"Got({tokens[0]}, want({want}))")
+            self.assertEqual(tokens[0].content, want)
+            if levels > 1:
+                for i in range(1, levels-2):
+                    self.assertEqual(tokens[i].tag, lexer.Tag.BLOCKQUOTE)
 
 
 if __name__ == "__main__":
