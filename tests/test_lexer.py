@@ -236,10 +236,9 @@ class TestLexer(unittest.TestCase):
             levels = test_case[1]
             want = test_case[2]
             tokens = l.get_tokens()
-            print(f"Got({tokens[0]}, want({want}))")
             self.assertEqual(tokens[0].content, want)
             if levels > 1:
-                for i in range(1, levels-2):
+                for i in range(1, levels - 2):
                     self.assertEqual(tokens[i].tag, lexer.Tag.BLOCKQUOTE)
 
 
