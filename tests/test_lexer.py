@@ -215,17 +215,17 @@ class TestLexer(unittest.TestCase):
             (">>quote", 2, "quote"),
             (">>>quote", 3, "quote"),
             (">>># quote", 3, "quote"),
-            ("># quote", 3, "quote"),
-            (">- quote", 3, "quote"),
-            (">12341234. quote", 3, "quote"),
+            ("># quote", 1, "quote"),
+            (">- quote", 1, "quote"),
+            (">12341234. quote", 1, "quote"),
             (">>>12341234. quote", 3, "quote"),
             ("> quote", 1, "quote"),
             (">   > quote", 2, "quote"),
             (">>> quote", 3, "quote"),
             (">  > > # quote", 3, "quote"),
-            (" ># quote", 3, "quote"),
-            ("  >- quote", 3, "quote"),
-            (" >12341234. quote", 3, "quote"),
+            (" ># quote", 1, "quote"),
+            ("  >- quote", 1, "quote"),
+            (" >12341234. quote", 1, "quote"),
             (" >> >12341234. quote", 3, "quote"),
         ]
 
@@ -236,10 +236,12 @@ class TestLexer(unittest.TestCase):
             levels = test_case[1]
             want = test_case[2]
             tokens = l.get_tokens()
-            self.assertEqual(tokens[0].content, want)
+            print(f"got({tokens[0]}), want({want})")
             if levels > 1:
-                for i in range(1, levels - 2):
+                for i in range(1, levels):
                     self.assertEqual(tokens[i].tag, lexer.Tag.BLOCKQUOTE)
+
+            self.assertEqual(tokens[levels].content, want)
 
 
 if __name__ == "__main__":

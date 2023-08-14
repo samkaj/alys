@@ -186,14 +186,13 @@ class Lexer:
 
     def handle_blockquote(self, line: str):
         if not self.is_blockquote(line):
-            raise TypeError(f'expected a blockquote (starts with >), got {line}')
-        
+            raise TypeError(f"expected a blockquote (starts with >), got {line}")
+        self.add(Token(Tag.BLOCKQUOTE))
+
         blockquote_index = line.find(">")
         is_empty_blockquote = blockquote_index == len(line) - 1
         if is_empty_blockquote:
-            self.add(Token(Tag.BLOCKQUOTE))
             return
 
-        content = line[blockquote_index+1:]
+        content = line[blockquote_index + 1 :]
         self.lex(content.lstrip())
-
