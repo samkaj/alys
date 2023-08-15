@@ -100,23 +100,14 @@ class TestLexer(unittest.TestCase):
 
     def test_handle_list(self):
         test_cases = [
-            ("      - list", 3, lexer.Tag.LI),
-            ("       * list", 3, lexer.Tag.LI),
             ("  - list", 1, lexer.Tag.LI),
             ("   1. list", 1, lexer.Tag.LI),
-            ("    1. list", 2, lexer.Tag.LI),
-            ("      1. list", 3, lexer.Tag.LI),
-            ("       1. list", 3, lexer.Tag.LI),
             ("  1. list", 1, lexer.Tag.LI),
             ("   1. list", 1, lexer.Tag.LI),
-            ("    1. list", 2, lexer.Tag.LI),
             ("  123452345. list", 1, lexer.Tag.LI),
             ("   3341114576776. list", 1, lexer.Tag.LI),
-            ("    11234432. list", 2, lexer.Tag.LI),
-            ("    112. 34432. list", 2, lexer.Tag.LI),
             ("  13948579283475. list", 1, lexer.Tag.LI),
             ("   1098098098. list", 1, lexer.Tag.LI),
-            ("    11235. list", 2, lexer.Tag.LI),
         ]
 
         for test_case in test_cases:
@@ -236,13 +227,29 @@ class TestLexer(unittest.TestCase):
             levels = test_case[1]
             want = test_case[2]
             tokens = l.get_tokens()
-            print(f"got({tokens[0]}), want({want})")
             if levels > 1:
                 for i in range(1, levels):
                     self.assertEqual(tokens[i].tag, lexer.Tag.BLOCKQUOTE)
 
             self.assertEqual(tokens[levels].content, want)
 
+    def test_handle_code_block(self):
+        test_cases = [
+            (["    hello", "      world"], lexer.Token(lexer.Tag.CODE, "hello\n  world")),
+            (["    # hello", "      world"], lexer.Token(lexer.Tag.CODE, "# hello\n  world")),
+            (["    # hello", "      - world"], lexer.Token(lexer.Tag.CODE, "# hello\n  - world")),
+            (["    # hello"], lexer.Token(lexer.Tag.CODE, "# hello")),
+            (["    > hello"], lexer.Token(lexer.Tag.CODE, "> hello")),
+        ]
+
+        for test_case in test_cases:
+            l = lexer.Lexer()
+            lines = test_case[0]
+            for line in lines:
+                l.lex(line)
+            got = l.get_latest_token()
+            want = test_case[1]
+            self.assertEqual(got.content, want.content)
 
 if __name__ == "__main__":
     unittest.main()

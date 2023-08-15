@@ -19,6 +19,7 @@ Tag = Enum(
         "HR",
         "BR",
         "BLOCKQUOTE",
+        "CODE",
     ],
 )
 

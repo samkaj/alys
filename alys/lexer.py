@@ -4,12 +4,15 @@ from alys.token import Tag, Token
 class Lexer:
     def __init__(self) -> None:
         self.tokens = []
-        self.current_tag = Tag.HTML
+        self.current_tag = Token(Tag.HTML)
 
     def add(self, token: Token):
         self.tokens.append(token)
 
     def lex(self, line: str):
+        if self.is_code_block(line):
+            self.handle_code_block(line)
+            return
         if self.is_atx(line):
             self.handle_atx_heading(line)
             return
@@ -34,6 +37,8 @@ class Lexer:
         return self.tokens
 
     def get_latest_token(self) -> Token:
+        if len(self.tokens) < 1:
+            return Token(Tag.EMPTY)
         return self.tokens[-1]
 
     def is_setext(self, line: str) -> bool:
@@ -196,3 +201,24 @@ class Lexer:
 
         content = line[blockquote_index + 1 :]
         self.lex(content.lstrip())
+
+    def is_code_block(self, line: str) -> bool:
+        if not line.startswith("    "):
+            return False
+
+        return self.get_latest_token().tag != Tag.LI
+
+    def handle_code_block(self, line: str):
+        if not self.is_code_block(line):
+            raise TypeError(
+                f"expected a code block (starts with 4 spaces or 1 tab), got {line}"
+            )
+
+        latest_token = self.get_latest_token()
+        in_code_block = latest_token.tag == Tag.CODE
+        if in_code_block:
+            new_content = f"{latest_token.content}\n{line[4:]}"
+            self.set_latest_token(Token(Tag.CODE, new_content))
+            return
+
+        self.add(Token(Tag.CODE, line[4:]))
