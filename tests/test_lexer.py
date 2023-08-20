@@ -1,8 +1,8 @@
+from alys import lexer
 import sys
 import unittest
 
 sys.path.insert(0, "..")
-from alys import lexer
 
 
 class TestLexer(unittest.TestCase):
@@ -120,7 +120,7 @@ class TestLexer(unittest.TestCase):
                 content = "".join(test_case[0].lstrip()[2:])
             else:
                 offset = test_case[0].find(". ")
-                content = "".join(test_case[0][offset + 2 :])
+                content = "".join(test_case[0][offset + 2:])
 
             for i in range(test_case[1]):
                 self.assertEqual(tokens[i].tag, lexer.Tag.IDENT)
@@ -235,14 +235,23 @@ class TestLexer(unittest.TestCase):
 
     def test_handle_code_block(self):
         test_cases = [
-            (["    hello", "      world"], lexer.Token(lexer.Tag.INDENTEDCODE, "hello\n  world")),
-            (["    # hello", "      world"], lexer.Token(lexer.Tag.INDENTEDCODE, "# hello\n  world")),
-            (["    # hello", "      - world"], lexer.Token(lexer.Tag.INDENTEDCODE, "# hello\n  - world")),
+            (["    hello", "      world"], lexer.Token(
+                lexer.Tag.INDENTEDCODE, "hello\n  world")),
+            (["    # hello", "      world"], lexer.Token(
+                lexer.Tag.INDENTEDCODE, "# hello\n  world")),
+            (["    # hello", "      - world"],
+             lexer.Token(lexer.Tag.INDENTEDCODE, "# hello\n  - world")),
             (["    # hello"], lexer.Token(lexer.Tag.INDENTEDCODE, "# hello")),
             (["    > hello"], lexer.Token(lexer.Tag.INDENTEDCODE, "> hello")),
             (["```"], lexer.Token(lexer.Tag.BACKTICKCODE, "")),
-            (["```", "hello", "```"], lexer.Token(lexer.Tag.BACKTICKCODE, "hello")),
-            (["```", "    hello", "```"], lexer.Token(lexer.Tag.BACKTICKCODE, "    hello")),
+            (["```", "hello", "```"], lexer.Token(
+                lexer.Tag.BACKTICKCODE, "hello")),
+            (["```", "    hello", "```"], lexer.Token(
+                lexer.Tag.BACKTICKCODE, "    hello")),
+            (["```", "hello", "  space", "hello", "hello", "```"], lexer.Token(
+                lexer.Tag.BACKTICKCODE, "hello\n  space\nhello\nhello")),
+            (["```", "hello", "hello", "hello", "hello", "```"], lexer.Token(
+                lexer.Tag.BACKTICKCODE, "hello\nhello\nhello\nhello")),
         ]
 
         for test_case in test_cases:
@@ -254,6 +263,7 @@ class TestLexer(unittest.TestCase):
             want = test_case[1]
             self.assertEqual(got.tag, want.tag)
             self.assertEqual(got.content, want.content)
+
 
 if __name__ == "__main__":
     unittest.main()
