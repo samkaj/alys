@@ -17,9 +17,6 @@ class Lexer:
         if self.is_code_block(line):
             self.handle_code_block(line)
             return
-        if self.is_list_item(line):
-            self.handle_list(line)
-            return
         if self.is_blockquote(line):
             self.handle_blockquote(line)
             return
@@ -28,6 +25,9 @@ class Lexer:
             return
         if self.is_setext(line):
             self.handle_setext_heading(line)
+            return
+        if self.is_list_item(line):
+            self.handle_list(line)
             return
         if self.is_hr(line):
             self.add(Token(Tag.HR))
@@ -218,10 +218,12 @@ class Lexer:
         self.lex(content.lstrip())
 
     def is_code_block(self, line: str) -> bool:
-        if line.startswith("    "): 
+        if line.startswith("    "):
             return self.get_latest_token().tag != Tag.LI
+
         if line.startswith("```"):
             return True
+
         return self.get_latest_token().tag == Tag.BACKTICKCODE
 
     def handle_code_block(self, line: str):

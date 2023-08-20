@@ -75,6 +75,7 @@ class TestLexer(unittest.TestCase):
             l.lex(above)
             l.lex(below)
             got = l.get_latest_token()
+            self.assertEqual(got.tag, want.tag)
             self.assertEqual(got.content, want.content)
 
     def test_is_list_item(self):
