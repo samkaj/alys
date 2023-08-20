@@ -10,8 +10,18 @@ class Lexer:
         self.tokens.append(token)
 
     def lex(self, line: str):
+        line = remove_trailing_newline(line)
+        if self.is_empty(line):
+            self.handle_empty(line)
+            return
         if self.is_code_block(line):
             self.handle_code_block(line)
+            return
+        if self.is_list_item(line):
+            self.handle_list(line)
+            return
+        if self.is_blockquote(line):
+            self.handle_blockquote(line)
             return
         if self.is_atx(line):
             self.handle_atx_heading(line)
@@ -19,14 +29,8 @@ class Lexer:
         if self.is_setext(line):
             self.handle_setext_heading(line)
             return
-        if self.is_list_item(line):
-            self.handle_list(line)
-            return
         if self.is_hr(line):
             self.add(Token(Tag.HR))
-            return
-        if self.is_blockquote(line):
-            self.handle_blockquote(line)
             return
         self.paragraph(line)
 
@@ -66,6 +70,15 @@ class Lexer:
 
     def set_latest_token(self, token: Token) -> None:
         self.tokens[-1] = token
+
+    def is_empty(self, line: str) -> bool:
+        return len(line) < 1
+
+    def handle_empty(self, line: str) -> None:
+        if not self.is_empty(line):
+            raise TypeError(f"expected an empty line, got {line}")
+
+        self.add(Token(Tag.EMPTY))
 
     def paragraph(self, line: str) -> None:
         self.add(Token(Tag.P, line))
@@ -109,7 +122,7 @@ class Lexer:
                 continue
             break
 
-        content = line[level + 1 : len(line) - trailing_hashes].strip()
+        content = line[level + 1: len(line) - trailing_hashes].strip()
 
         match level:
             case 1:
@@ -147,7 +160,8 @@ class Lexer:
 
     def handle_list(self, line: str):
         if not self.is_list_item(line):
-            raise TypeError(f'expected a list item ("n. ", "- ", or "* "), got {line}')
+            raise TypeError(
+                f'expected a list item ("n. ", "- ", or "* "), got {line}')
 
         is_unordered = line.startswith("-") or line.startswith("*")
         idents = 0
@@ -171,7 +185,7 @@ class Lexer:
         for _ in range(idents // 2):
             self.add(Token(Tag.IDENT))
 
-        content = line[idents + offset + 2 :]
+        content = line[idents + offset + 2:]
 
         self.add(Token(Tag.LI, content))
 
@@ -191,7 +205,8 @@ class Lexer:
 
     def handle_blockquote(self, line: str):
         if not self.is_blockquote(line):
-            raise TypeError(f"expected a blockquote (starts with >), got {line}")
+            raise TypeError(
+                f"expected a blockquote (starts with >), got {line}")
         self.add(Token(Tag.BLOCKQUOTE))
 
         blockquote_index = line.find(">")
@@ -199,14 +214,15 @@ class Lexer:
         if is_empty_blockquote:
             return
 
-        content = line[blockquote_index + 1 :]
+        content = line[blockquote_index + 1:]
         self.lex(content.lstrip())
 
     def is_code_block(self, line: str) -> bool:
-        if not line.startswith("    "):
-            return False
-
-        return self.get_latest_token().tag != Tag.LI
+        if line.startswith("    "): 
+            return self.get_latest_token().tag != Tag.LI
+        if line.startswith("```"):
+            return True
+        return self.get_latest_token().tag == Tag.BACKTICKCODE
 
     def handle_code_block(self, line: str):
         if not self.is_code_block(line):
@@ -215,10 +231,32 @@ class Lexer:
             )
 
         latest_token = self.get_latest_token()
-        in_code_block = latest_token.tag == Tag.CODE
-        if in_code_block:
+        in_indented_code_block = latest_token.tag == Tag.INDENTEDCODE
+        if in_indented_code_block:
             new_content = f"{latest_token.content}\n{line[4:]}"
-            self.set_latest_token(Token(Tag.CODE, new_content))
+            self.set_latest_token(Token(Tag.INDENTEDCODE, new_content))
             return
 
-        self.add(Token(Tag.CODE, line[4:]))
+        in_backtick_code_block = latest_token.tag == Tag.BACKTICKCODE
+        if in_backtick_code_block:
+            if line == "```":
+                return
+            
+            new_content = line
+            if len(latest_token.content) > 0:
+                new_content = f"{latest_token.content}\n{line}"
+
+            self.set_latest_token(Token(Tag.BACKTICKCODE, new_content))
+            return
+        
+        if line.startswith("```"):
+            self.add(Token(Tag.BACKTICKCODE))
+            return
+
+        self.add(Token(Tag.INDENTEDCODE, line[4:]))
+
+
+def remove_trailing_newline(line: str) -> str:
+    if line.endswith("\n"):
+        return line[:-1]
+    return line

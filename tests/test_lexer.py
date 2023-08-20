@@ -2,7 +2,7 @@ import sys
 import unittest
 
 sys.path.insert(0, "..")
-from alys import lexer, token
+from alys import lexer
 
 
 class TestLexer(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestLexer(unittest.TestCase):
             ("# h1", lexer.Token(lexer.Tag.H1, "h1")),
             ("# # h1", lexer.Token(lexer.Tag.H1, "# h1")),
             ("# # h1 #################", lexer.Token(lexer.Tag.H1, "# h1")),
-            ("## h2", lexer.Token(lexer.Tag.H2, "h2")),
+            ("## ok h2", lexer.Token(lexer.Tag.H2, "ok h2")),
             ("##h2", lexer.Token(lexer.Tag.P, "##h2")),
             ("### h3", lexer.Token(lexer.Tag.H3, "h3")),
             ("#### h4", lexer.Token(lexer.Tag.H5, "h4")),
@@ -235,11 +235,14 @@ class TestLexer(unittest.TestCase):
 
     def test_handle_code_block(self):
         test_cases = [
-            (["    hello", "      world"], lexer.Token(lexer.Tag.CODE, "hello\n  world")),
-            (["    # hello", "      world"], lexer.Token(lexer.Tag.CODE, "# hello\n  world")),
-            (["    # hello", "      - world"], lexer.Token(lexer.Tag.CODE, "# hello\n  - world")),
-            (["    # hello"], lexer.Token(lexer.Tag.CODE, "# hello")),
-            (["    > hello"], lexer.Token(lexer.Tag.CODE, "> hello")),
+            (["    hello", "      world"], lexer.Token(lexer.Tag.INDENTEDCODE, "hello\n  world")),
+            (["    # hello", "      world"], lexer.Token(lexer.Tag.INDENTEDCODE, "# hello\n  world")),
+            (["    # hello", "      - world"], lexer.Token(lexer.Tag.INDENTEDCODE, "# hello\n  - world")),
+            (["    # hello"], lexer.Token(lexer.Tag.INDENTEDCODE, "# hello")),
+            (["    > hello"], lexer.Token(lexer.Tag.INDENTEDCODE, "> hello")),
+            (["```"], lexer.Token(lexer.Tag.BACKTICKCODE, "")),
+            (["```", "hello", "```"], lexer.Token(lexer.Tag.BACKTICKCODE, "hello")),
+            (["```", "    hello", "```"], lexer.Token(lexer.Tag.BACKTICKCODE, "    hello")),
         ]
 
         for test_case in test_cases:
@@ -249,6 +252,7 @@ class TestLexer(unittest.TestCase):
                 l.lex(line)
             got = l.get_latest_token()
             want = test_case[1]
+            self.assertEqual(got.tag, want.tag)
             self.assertEqual(got.content, want.content)
 
 if __name__ == "__main__":
