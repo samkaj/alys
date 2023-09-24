@@ -253,6 +253,20 @@ class TestLexer(unittest.TestCase):
                 lexer.Tag.BACKTICKCODE, "hello\n  space\nhello\nhello")),
             (["```", "hello", "hello", "hello", "hello", "```"], lexer.Token(
                 lexer.Tag.BACKTICKCODE, "hello\nhello\nhello\nhello")),
+            (
+                ["    hello", "      world"],
+                lexer.Token(lexer.Tag.INDENTEDCODE, "hello\n  world"),
+            ),
+            (
+                ["    # hello", "      world"],
+                lexer.Token(lexer.Tag.INDENTEDCODE, "# hello\n  world"),
+            ),
+            (
+                ["    # hello", "      - world"],
+                lexer.Token(lexer.Tag.INDENTEDCODE, "# hello\n  - world"),
+            ),
+            (["    # hello"], lexer.Token(lexer.Tag.INDENTEDCODE, "# hello")),
+            (["    > hello"], lexer.Token(lexer.Tag.INDENTEDCODE, "> hello")),
         ]
 
         for test_case in test_cases:
@@ -265,6 +279,22 @@ class TestLexer(unittest.TestCase):
             self.assertEqual(got.tag, want.tag)
             self.assertEqual(got.content, want.content)
 
+    def test_ignore_spans(self):
+        test_cases = [
+            ("`text`", lexer.Token(lexer.Tag.P, "`text`")),
+            ("**text**", lexer.Token(lexer.Tag.P, "**text**")),
+            ("_text_", lexer.Token(lexer.Tag.P, "_text_")),
+            ("*text*", lexer.Token(lexer.Tag.P, "*text*")),
+            ("this is some *text*", lexer.Token(lexer.Tag.P, "this is some *text*")),
+        ]
+
+        for test_case in test_cases:
+            l = lexer.Lexer()
+            l.lex(test_case[0])
+            got = l.get_latest_token()
+            want = test_case[1]
+            self.assertEqual(got.content, want.content)
+            self.assertEqual(got.tag, want.tag)
 
 if __name__ == "__main__":
     unittest.main()
