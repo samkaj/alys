@@ -63,7 +63,7 @@ class SpanTransformer:
     def handle_bold(self, line: str) -> str:
         bold_pattern = re.compile(rf"{pattern_dict['bold_pattern']}")
 
-        def replacer(m):
+        def replacer(m: re.Match):
             inner = m.group(1) or m.group(2)
             inner = inner[2:-2]
             inner = self.handle_bold(inner)
